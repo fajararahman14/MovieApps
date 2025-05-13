@@ -2,6 +2,7 @@ package com.test.movieapps.moviescreen.data
 
 import com.test.movieapps.moviescreen.data.dto.GenreResponseDto
 import com.test.movieapps.moviescreen.data.dto.ListMovieResponseDto
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -14,9 +15,7 @@ interface MovieApiInterface {
     suspend fun getMovie(
         @Query("with_genres") genreId: Int,
         @Query("page") page: Int
-    ): ListMovieResponseDto
-
-
+    ): Response<ListMovieResponseDto>
 
 
 }

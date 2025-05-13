@@ -1,6 +1,10 @@
 package com.test.movieapps.di
 
 import com.test.movieapps.BuildConfig
+import com.test.movieapps.detailmoviescreen.data.DetailMovieApiInterface
+import com.test.movieapps.moviescreen.data.MovieApiInterface
+import com.test.movieapps.moviescreen.data.MovieRepositoryImpl
+import com.test.movieapps.moviescreen.domain.MovieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,8 +26,7 @@ object AppModule {
     fun provideOkHttp(): OkHttpClient {
         val timeout = 90L
         return OkHttpClient().newBuilder()
-            .addInterceptor {
-                chain ->
+            .addInterceptor { chain ->
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
                     .header("Authorization", BuildConfig.API_KEY)
@@ -37,6 +40,7 @@ object AppModule {
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .build()
     }
+
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
@@ -44,5 +48,27 @@ object AppModule {
             .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .build()
+    }
+    @Provides
+    @Singleton
+    fun provideMovieApiInterface(retrofit: Retrofit): MovieApiInterface {
+        return retrofit.create(MovieApiInterface::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDetailMovieApiInterface(retrofit: Retrofit): DetailMovieApiInterface {
+        return retrofit.create(DetailMovieApiInterface::class.java)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideMovieRepository(
+        movieApiInterface: MovieApiInterface
+    ): MovieRepository {
+        return MovieRepositoryImpl(
+            movieApiInterface
+        )
     }
 }

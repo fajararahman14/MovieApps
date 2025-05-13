@@ -15,13 +15,3 @@ data class AuthorDetails(
 	val username: String? = null
 )
 
-data class ResultsItem(
-	val authorDetails: AuthorDetails? = null,
-	val updatedAt: String? = null,
-	val author: String? = null,
-	val createdAt: String? = null,
-	val id: String? = null,
-	val content: String? = null,
-	val url: String? = null
-)
-
