@@ -25,11 +25,14 @@ object AppModule {
     @Singleton
     fun provideOkHttp(): OkHttpClient {
         val timeout = 90L
+        val loggingInterceptor = HttpLoggingInterceptor()
+        loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY // You can choose LEVEL.BODY, LEVEL.HEADERS, etc.
         return OkHttpClient().newBuilder()
             .addInterceptor { chain ->
                 val original = chain.request()
                 val requestBuilder = original.newBuilder()
-                    .header("Authorization", BuildConfig.API_KEY)
+                    .header("Authorization", "Bearer ${BuildConfig.API_KEY}")
+                    .addHeader("accept", "application/json")
                     .build()
                 chain.proceed(requestBuilder)
             }
@@ -37,7 +40,7 @@ object AppModule {
             .readTimeout(timeout, TimeUnit.SECONDS)
             .writeTimeout(timeout, TimeUnit.SECONDS)
             .connectTimeout(timeout, TimeUnit.SECONDS)
-            .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 
@@ -46,6 +49,7 @@ object AppModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl(BuildConfig.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
     }

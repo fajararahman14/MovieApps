@@ -85,4 +85,9 @@ dependencies {
     implementation("androidx.paging:paging-compose:3.3.6")
     implementation("androidx.paging:paging-runtime:3.3.6")
     implementation("androidx.room:room-paging:2.6.1")
+    implementation ("io.coil-kt:coil-compose:2.4.0")
+
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.3")
+
 }

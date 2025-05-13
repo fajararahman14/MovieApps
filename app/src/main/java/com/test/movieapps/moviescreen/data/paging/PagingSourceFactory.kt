@@ -1,5 +1,6 @@
 package com.test.movieapps.moviescreen.data.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingSourceFactory
 import androidx.paging.PagingState
@@ -11,7 +12,7 @@ import com.test.movieapps.moviescreen.domain.MovieRepository
 
 class PagingSourceFactory(
     private val movieApiInterface: MovieApiInterface,
-    private val genreId: Int
+    private val genreId: String
 ) : PagingSource<Int, MovieItem>() {
     override fun getRefreshKey(state: PagingState<Int, MovieItem>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -22,6 +23,7 @@ class PagingSourceFactory(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MovieItem> {
         return try {
+            Log.d("PagingSourceFactory", "Ini TEST")
             val page = params.key ?: 1
             val response = movieApiInterface.getMovie(genreId, page)
             val dataList = response.body()?.results?.filterNotNull() ?: emptyList()
@@ -31,6 +33,7 @@ class PagingSourceFactory(
                 nextKey = if (dataList.isNotEmpty()) page + 1 else null
             )
         } catch (e: Exception) {
+            e.printStackTrace()
             LoadResult.Error(e)
         }
 

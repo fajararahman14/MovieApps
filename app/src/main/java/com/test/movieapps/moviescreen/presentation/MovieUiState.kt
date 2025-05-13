@@ -1,5 +1,6 @@
 package com.test.movieapps.moviescreen.presentation
 
+import com.test.movieapps.moviescreen.data.dto.GenreItem
 import com.test.movieapps.moviescreen.data.dto.MovieItem
 
 data class MovieUiState(
@@ -9,5 +10,6 @@ data class MovieUiState(
     val errorMessage : String = "",
 
     val listMovie : List<MovieItem?>? = emptyList(),
+    val listGenre : List<GenreItem?>? = emptyList(),
 
-)
+    )

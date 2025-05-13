@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.test.movieapps.moviescreen.presentation.MovieScreen
+import com.test.movieapps.navigation.NavigationApp
 import com.test.movieapps.ui.theme.MovieAppsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,11 +25,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MovieAppsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MovieScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                NavigationApp(
+                    navController = rememberNavController()
+                )
             }
         }
     }

@@ -1,11 +1,11 @@
 package com.test.movieapps.moviescreen.data
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.test.movieapps.Resource
-import com.test.movieapps.moviescreen.data.dto.GenreItem
-import com.test.movieapps.moviescreen.data.dto.ListMovieResponseDto
+import com.test.movieapps.moviescreen.data.dto.GenreResponseDto
 import com.test.movieapps.moviescreen.data.dto.MovieItem
 import com.test.movieapps.moviescreen.data.paging.PagingSourceFactory
 import com.test.movieapps.moviescreen.domain.MovieRepository
@@ -13,65 +13,47 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import java.net.ConnectException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class MovieRepositoryImpl(
     private val movieApiInterface: MovieApiInterface
 ) : MovieRepository {
-    override suspend fun getGenre(): Flow<Resource<GenreItem>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getListMovie(
-        genreId: Int,
-        page: Int
-    ): Flow<Resource<ListMovieResponseDto>> {
+    override suspend fun getGenre(): Flow<Resource<GenreResponseDto>> {
         return flow {
-            emit(Resource.Loading("Loading"))
+            emit(Resource.Loading("Loading Genre"))
             try {
-                val response = movieApiInterface.getMovie(genreId, page)
+                val response = movieApiInterface.getGenre()
                 if (response.isSuccessful) {
-                    val responseData = response.body()
-                    if (responseData != null) {
-                        // Filter out null values from results
-                        val validResults = responseData.results?.filterNotNull() ?: emptyList()
-                        val updatedResponse = responseData.copy(results = validResults)
-                        emit(Resource.Success(updatedResponse))
+                    val data = response.body() // This should return GenreResponseDto, not List<GenreItem>
+                    if (data != null) {
+                        emit(Resource.Success(data))  // Emitting the GenreResponseDto
                     } else {
-                        emit(Resource.Error("Response body is null"))
+                        emit(Resource.Error("No data found"))
                     }
                 } else {
-                    emit(Resource.Error("Error: ${response.code()} - ${response.message()}"))
+                    emit(Resource.Error("Error: ${response.message()}"))
                 }
+            } catch (e: SocketTimeoutException) {
+                emit(Resource.Error("Timeout"))
+            } catch (e: UnknownHostException) {
+                emit(Resource.Error("No Connection"))
             } catch (e: Exception) {
-                when (e) {
-                    is SocketTimeoutException -> {
-                        emit(Resource.Error("Connection timeout, please try again"))
-                    }
-                    is UnknownHostException -> {
-                        emit(Resource.Error("No internet connection"))
-                    }
-                    is ConnectException -> {
-                        emit(Resource.Error("Connection error, please try again"))
-                    }
-                    else -> {
-                        emit(Resource.Error(e.message ?: "An unknown error occurred"))
-                    }
-                }
+                emit(Resource.Error("Unexpected error: ${e.localizedMessage}"))
             }
         }.flowOn(Dispatchers.IO)
     }
 
 
-    override suspend fun pagingGetListMovie(genreId: Int): Flow<PagingData<MovieItem>> {
+    override suspend fun pagingGetListMovie(genreId: String): Flow<PagingData<MovieItem>> {
+        Log.d("pagingGetListMovie", "Ini TEST")
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = false
             ),
-            pagingSourceFactory = { PagingSourceFactory(movieApiInterface, genreId) }
+
+            pagingSourceFactory = { PagingSourceFactory(movieApiInterface, genreId.toString()) }
         ).flow
     }
 }
